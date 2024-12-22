@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messages</title>
+  <style>
+    .message {
+      margin: 20px;
+      display: inline-block;
+      width: 200px;
+      text-align: center;
+    }
+    .message img {
+      max-width: 100%;
+      height: auto;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="messages-container"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      function fetchMessages(url) {
+        fetch(url)
+          .then(response => response.json())
+          .then(({ messages }) => {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = '';
+
+            messages.forEach(message => {
+              const messageDiv = document.createElement('div');
+              messageDiv.classList.add('message');
+              messageDiv.innerHTML = `
+                <img src="data:image/jpeg;base64,${message.img}" alt="Message Image" data-id="${message.id}">
+              `;
+
+              // Add event listener for image click
+              messageDiv.querySelector('img').addEventListener('click', (e) => {
+                const id = e.target.dataset.id;
+                window.location.search = `?id=${id}`;
+              });
+
+              container.appendChild(messageDiv);
+            });
+          })
+          .catch(error => {
+            console.error('Error fetching messages:', error);
+          });
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get('id');
+
+      if (id) {
+        fetchMessages(`/messages?id=${id}`);
+      } else {
+        fetchMessages('/messages');
+      }
+    });
+  </script>
+</body>
+</html>
